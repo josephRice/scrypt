@@ -13,7 +13,6 @@ ulong SCRYPT_N_DEFAULT = 16384;
 uint SCRYPT_R_DEFAULT = 8;
 uint SCRYPT_P_DEFAULT = 1;
 size_t SCRYPT_OUTPUTLEN_DEFAULT = 128;
-private enum TERMINATOR = '$';
 
 ubyte[] generatePassword(string password) {
     return generatePassword(password, randomUUID.data);
