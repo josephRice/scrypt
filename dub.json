@@ -3,5 +3,6 @@
 	"description": "A simple password hashing lib utilising libscrypt",
 	"copyright": "Copyright © 2014, Brendan McKenzie",
 	"authors": ["Brendan McKenzie"],
-    "libs": ["scrypt"]
+    "libs": ["scrypt"],
+    "license": "Apache-2.0"
 }
