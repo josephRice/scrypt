@@ -1,2 +1,4 @@
 .dub
 __test__library__
+libscrypt.a
+scrypt-test-library
