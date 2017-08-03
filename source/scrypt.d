@@ -35,6 +35,24 @@ size_t SCRYPT_OUTPUTLEN_DEFAULT = 128;
 
 bool SCRYPT_DEBUG = false;
 
+ubyte[] hex_to_ubyteArray(string hexnum) {
+    import std.conv: parse;
+    import std.array: array;
+    import std.range: chunks;
+    import std.algorithm: map;
+
+    ubyte[] bytes = hexnum.chunks(2)
+                .map!(twoDigits => twoDigits.parse!ubyte(16)).array();
+
+    return bytes;
+}
+
+string to_hex(ubyte[] bytes) {
+    import std.digest.digest;
+
+    return bytes.toHexString();
+}
+
 ubyte[] generatePassword(string password) {
     return generatePassword(password, randomUUID.data);
 }
@@ -123,11 +141,27 @@ unittest {
     assert(!checkPassword(hash, "not-test"));
     writeln("*** > passed");
 
-	//
-	// unit test #2
-	//
+    //
+    //unit test #2
+    //
+    writeln("\n\n+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=");
+    writeln("+ test #2: convert to hex string and back!");
     writeln("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=");
-    writeln("+ test #2: crypto_scrypt with static salt");
+
+    string hex = scrypt.to_hex(hash);
+    ubyte[] back_to_hash = scrypt.hex_to_ubyteArray(hex);
+
+    writeln("*** > orignal hash: " ~ to!string(hash));
+    writeln("*** > to_hex: " ~ hex);
+    writeln("*** > back to hash: " ~ to!string(back_to_hash));
+    assert(hash == back_to_hash);
+    writeln("*** > passed");
+
+	//
+	// unit test #3
+	//
+    writeln("\n\n+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=");
+    writeln("+ test #3: crypto_scrypt with static salt");
     writeln("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=");
 	SodiumChloride salt = new SodiumChloride("test");
     auto password = "password";
@@ -144,8 +178,9 @@ unittest {
     writeln("*** > R: " ~ to!string(r));
     writeln("*** > P: " ~ to!string(p));
     writeln("*** > scrypt: " ~ to!string(hash2));
-    writeln("*** > scrypt Hex: " ~ hash2.toHexString());
+    writeln("*** > scrypt Hex: " ~ scrypt.to_hex(hash2));
     assert(hash2 !is null);
+
 
     writeln("*** test: checkPassword");
     assert(checkPassword(hash2, password,N,r,p,L));
@@ -156,10 +191,10 @@ unittest {
     writeln("*** > passed");
 
 	//
-	// unit test #3
+	// unit test #4
 	//
-    writeln("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=");
-    writeln("+ test #3: crypto_scrypt with random salt and Length=512");
+    writeln("\n\n+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=");
+    writeln("+ test #4: crypto_scrypt with random salt and Length=512");
     writeln("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=");
 	salt = new SodiumChloride();
     password = "password";
@@ -176,7 +211,7 @@ unittest {
     writeln("*** > R: " ~ to!string(r));
     writeln("*** > P: " ~ to!string(p));
     writeln("*** > scrypt: " ~ to!string(hash2));
-    writeln("*** > scrypt Hex: " ~ hash2.toHexString());
+    writeln("*** > scrypt Hex: " ~ to_hex(hash2));
     assert(hash2 !is null);
 
     writeln("*** test: checkPassword");
