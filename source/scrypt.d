@@ -97,7 +97,7 @@ ubyte[] crypto_scrypt(string password, ubyte[] salt, ulong N, uint r, uint p, ul
 bool checkPassword(ubyte[] hash, string password) {
 	import std.conv;
 	import std.stdio;
-	
+
 	bool ret = false;
 
 	if (SCRYPT_OUTPUTLEN_DEFAULT > hash.length) return ret;
