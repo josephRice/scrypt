@@ -1,25 +1,45 @@
 module scrypt;
 
 import std.string : indexOf;
-import std.exception : enforce;
+import std.exception;
 import std.digest.digest : toHexString;
 import std.uuid : randomUUID;
 import std.algorithm : splitter;
 import std.array: array;
 import std.conv: to;
 
+import random;
+
+uint SCRYPT_RAND_LEN = 32;
+ulong SCRYPT_N_DEFAULT = 16384;
+uint SCRYPT_R_DEFAULT = 8;
+uint SCRYPT_P_DEFAULT = 1;
+size_t SCRYPT_OUTPUTLEN_DEFAULT = 128;
+
+bool SCRYPT_DEBUG = false;
+
+public class ScryptException : Exception
+{
+    this(string message) {super(message);}
+}
 
 public class SodiumChloride {
-    import std.uuid;
-
     public string na;
     public ubyte[] cl;
 
-    this() {
-        UUID uuid = randomUUID();
+    this(uint len) {
+        try {
+            ubyte[] randomNum = scryptRNG(len);
 
-        this.na = uuid.toString();
-        this.cl = cast(ubyte[])this.na;
+            this.na = randomNum.toHexString();
+            this.cl = cast(ubyte[])this.na;
+        } catch (ScryptRNGException rng) {
+            throw new ScryptException(rng.msg);
+        }
+    }
+
+    this() {
+        this(SCRYPT_RAND_LEN);
     }
 
     this(string str) {
@@ -27,13 +47,6 @@ public class SodiumChloride {
         this.cl = cast(ubyte[])this.na;
     }
 }
-
-ulong SCRYPT_N_DEFAULT = 16384;
-uint SCRYPT_R_DEFAULT = 8;
-uint SCRYPT_P_DEFAULT = 1;
-size_t SCRYPT_OUTPUTLEN_DEFAULT = 128;
-
-bool SCRYPT_DEBUG = false;
 
 ubyte[] hex_to_ubyteArray(string hexnum) {
     import std.conv: parse;
@@ -54,7 +67,9 @@ string to_hex(ubyte[] bytes) {
 }
 
 ubyte[] generatePassword(string password) {
-    return generatePassword(password, randomUUID.data);
+    SodiumChloride salt = new SodiumChloride();
+
+    return generatePassword(password, salt.cl);
 }
 
 ubyte[] generatePassword(string password, ubyte[] salt) {
